@@ -777,10 +777,10 @@ const generateReport = (report) => {
             </div>
             <hr style="border-width: 3px ;color: black;">
             <div class="sub-company-info">
-                Level 2, Wisma Comcor, No.37, Jalan Pulas UH6, Section U1, Temasya Industrial Park, 40150 Shah Alam, Selangor Darul Ehsan, Malaysia
+                Level 2, Wisma Comcorp, No.37, Jalan Pelukis U1/46, Section U1, Temasya Industrial Park, 40150 Glenmarie,  Shah Alam, Selangor Darul Ehsan, Malaysia.
             </div>
             <div class="sub-company-info">
-                Tel: +603-5569 3788 &nbsp; | &nbsp; Fax: +603-5569 3809
+                Tel: +603-5568 3188 &nbsp; | &nbsp; Fax: +603-5569 3809
             </div>
 
             <table class="small-table">

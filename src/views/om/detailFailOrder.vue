@@ -105,14 +105,14 @@
                         <div v-if="orderData.sapErrorResponse?.data?.resultset && Array.isArray(orderData.sapErrorResponse.data.resultset) && orderData.sapErrorResponse.data.resultset.length > 0" class="mb-6">
                             <div class="text-sm font-semibold text-gray-700 mb-3">Error Details</div>
                             <div class="space-y-2">
-                                <div v-for="(error, index) in orderData.sapErrorResponse.data.resultset" :key="index" class="p-3 bg-white rounded border border-red-200">
+                                <div v-for="(error, index) in orderData.sapErrorResponse.data.resultset" :key="index" :class="['p-3 bg-white rounded border', error.type === 'E' ? 'border-red-400' : error.type === 'S' ? 'border-green-400' : 'bg-gray-100 text-gray-800']">
                                     <div class="flex items-start gap-2 mb-1">
                                         <span :class="['px-2 py-1 text-xs font-semibold rounded', error.type === 'E' ? 'bg-red-100 text-red-800' : error.type === 'S' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800']">
                                             {{ error.type }}
                                         </span>
                                         <span class="text-sm font-medium text-gray-700">{{ error.id }} ({{ error.number }})</span>
                                     </div>
-                                    <div class="text-red-700 mt-1">{{ error.message }}</div>
+                                    <div :class="['mt-1', error.type === 'E' ? ' text-red-800' : error.type === 'S' ? 'text-green-800' : 'bg-gray-100 text-gray-800']">{{ error.message }}</div>
                                 </div>
                             </div>
                         </div>
