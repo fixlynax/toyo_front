@@ -44,8 +44,19 @@
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <span class="font-bold text-gray-800">{{ data.function }}</span>
-                        <span v-if="data.description" class="font-semibold text-ms text-gray-500 mt-1 line-clamp-2">{{ data.description }}</span>
-                        <span v-else class="text-xm text-gray-400 italic mt-1">No description</span>
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Updated Description Column -->
+            <Column header="Description" style="min-width: 12rem">
+                <template #body="{ data }">
+                    <div class="description-column-wrapper">
+                        <div v-if="data.description" class="description-content">
+                            <div class="description-text" v-html="data.description"></div>
+                            <Button icon="pi pi-eye" class="p-button-text p-button-xm description-icon-btn" @click="viewFullDescription(data)" :title="'View full description'" />
+                        </div>
+                        <span v-else class="no-description">No description</span>
                     </div>
                 </template>
             </Column>
@@ -68,7 +79,7 @@
                 <template #body="{ data }">
                     <div class="flex items-center">
                         <Badge class="w-8">{{ data.emails.length }}</Badge>
-                         <span class="text-black ml-2">recipient(s)</span>
+                        <span class="text-black ml-2">recipient(s)</span>
                         <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-xm" @click="viewEmails(data)" title="View emails" />
                     </div>
                 </template>
@@ -117,21 +128,13 @@
                     <!-- Storage Location -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1"> Shipping Point (Storage Location)</label>
-                        <Dropdown
-                            v-model="editForm.storageLocation"
-                            :options="storageLocationOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select shipping point"
-                            class="w-full"
-                            disabled
-                        />
+                        <Dropdown v-model="editForm.storageLocation" :options="storageLocationOptions" optionLabel="label" optionValue="value" placeholder="Select shipping point" class="w-full" disabled />
                     </div>
 
-                    <!-- Description -->
+                    <!-- Description with Text Editor -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1"> Description </label>
-                        <Textarea v-model="editForm.description" :rows="3" class="w-full" placeholder="Enter description..." />
+                        <TipTapEditorDesc v-model="editForm.description" :placeholderDesc="'Enter description...'" :showIconsDesc="true" :showCharacterCountDesc="false" />
                     </div>
 
                     <!-- Email Recipients -->
@@ -148,7 +151,6 @@
                             <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
                                 <span class="text-gray-700">
                                     {{ emailObj.email }}
-                                    <!-- <span class="text-gray-500 text-xs ml-1">({{ emailObj.email }})</span> -->
                                 </span>
                                 <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
                                     <i class="pi pi-times text-xs"></i>
@@ -191,7 +193,7 @@
         <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="false">
             <div v-if="viewingSetting" class="py-4">
                 <div class="mb-4">
-                    <div class="text-lg font-semibold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
+                    <div class="text-lg font-bold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
                     <div class="text-sm text-gray-500">{{ viewingSetting.emails.length }} recipient(s)</div>
                 </div>
 
@@ -222,6 +224,22 @@
                 </div>
             </div>
         </Dialog>
+
+        <!-- Full Description Dialog -->
+        <Dialog v-model:visible="descriptionDialogVisible" :style="{ width: '700px' }" header="Description" :modal="true" :closable="false" :draggable="false">
+            <div v-if="viewingDescription" class="py-4">
+                <div class="mb-4">
+                    <div class="text-lg font-bold text-gray-800 mb-1">{{ viewingDescription.function }}</div>
+                    <!-- <div class="text-sm text-gray-500">{{ viewingDescription.shippingPoint || 'No shipping point' }}</div> -->
+                </div>
+
+                <div class="description-full-view border border-gray-200 rounded-md p-4 bg-gray-50" v-html="viewingDescription.description"></div>
+
+                <div class="flex justify-end pt-4 mt-4">
+                    <Button label="Close" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="descriptionDialogVisible = false" />
+                </div>
+            </div>
+        </Dialog>
     </div>
 </template>
 
@@ -233,6 +251,7 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
 import MultiSelect from 'primevue/multiselect';
+import TipTapEditorDesc from '@/components/TipTapEditorDesc.vue';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 
@@ -243,7 +262,8 @@ export default {
         Dialog,
         Dropdown,
         Textarea,
-        MultiSelect
+        MultiSelect,
+        TipTapEditorDesc
     },
     setup() {
         const toast = useToast();
@@ -255,8 +275,10 @@ export default {
             loading: true,
             editDialogVisible: false,
             viewEmailsDialogVisible: false,
+            descriptionDialogVisible: false,
             editingSetting: null,
             viewingSetting: null,
+            viewingDescription: null,
             filters1: { global: { value: null, matchMode: 'contains' } },
             // Email editing state
             emailObjects: [],
@@ -393,6 +415,11 @@ export default {
         viewEmails(setting) {
             this.viewingSetting = setting;
             this.viewEmailsDialogVisible = true;
+        },
+
+        viewFullDescription(setting) {
+            this.viewingDescription = setting;
+            this.descriptionDialogVisible = true;
         },
 
         async editSetting(setting) {
@@ -634,7 +661,76 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom email tag styling */
+/* Updated Description Column Styling */
+.description-column-wrapper {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.description-content {
+    display: flex;
+    align-items: flex-start;
+    width: 90%;
+}
+
+.description-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    max-height: 3.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 1.4em;
+}
+
+/* List styling for description preview */
+.description-text :deep(p) {
+    margin: 0 0 0.5em 0;
+}
+
+.description-text :deep(ul) {
+    list-style-type: disc !important;
+    padding-left: 1.5em !important;
+    margin: 0.5em 0 !important;
+}
+
+.description-text :deep(ol) {
+    list-style-type: decimal !important;
+    padding-left: 1.5em !important;
+    margin: 0.5em 0 !important;
+}
+
+.description-text :deep(li) {
+    margin: 0.25em 0 !important;
+}
+
+.description-text :deep(li > p) {
+    margin: 0 !important;
+}
+
+.description-icon-btn {
+    width: 25px;
+    height: 65px;
+    padding: 0;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.description-icon-btn:hover {
+    background-color: #f3f4f6 !important;
+}
+
+.no-description {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Email tag styling */
 .email-tag {
     transition: all 0.2s ease;
 }
@@ -648,11 +744,45 @@ export default {
     color: #ef4444 !important;
 }
 
-/* Line clamp for description text */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+/* Description dialog styling */
+.description-full-view {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* List styling for full description view */
+.description-full-view :deep(p) {
+    margin-bottom: 0.75rem;
+}
+
+.description-full-view :deep(ul) {
+    list-style-type: disc !important;
+    padding-left: 1.5em !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.description-full-view :deep(ol) {
+    list-style-type: decimal !important;
+    padding-left: 1.5em !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.description-full-view :deep(li) {
+    margin-bottom: 0.25rem !important;
+}
+
+.description-full-view :deep(li > p) {
+    margin: 0 !important;
+}
+
+/* Ensure editor is properly visible in dialog */
+:deep(.tiptap-editor-desc) {
+    background: white;
+}
+
+:deep(.tiptap-editor-desc .editor-content-desc) {
+    background: white;
 }
 </style>
