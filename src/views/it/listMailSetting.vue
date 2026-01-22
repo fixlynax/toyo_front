@@ -59,8 +59,7 @@
             <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="flex items-center">
-                        <i class="pi pi-map-marker text-primary mr-2"></i>
-                        <span class="text-black font-semibold">{{ data.shippingPoint || 'Not specified' }}</span>
+                        <span class="text-black font-semibold">{{ data.shippingPoint || '-' }}</span>
                     </div>
                 </template>
             </Column>
@@ -68,9 +67,9 @@
             <Column header="Email Recipients" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex items-center">
-                        <i class="pi pi-users text-primary mr-2"></i>
-                        <span class="text-gray-700">{{ data.emails.length }} recipient(s)</span>
-                        <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-sm ml-2" @click="viewEmails(data)" title="View emails" />
+                        <Badge class="w-8">{{ data.emails.length }}</Badge>
+                         <span class="text-black ml-2">recipient(s)</span>
+                        <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-xm" @click="viewEmails(data)" title="View emails" />
                     </div>
                 </template>
             </Column>
@@ -125,13 +124,8 @@
                             optionValue="value"
                             placeholder="Select shipping point"
                             class="w-full"
-                            :class="{ 'border-red-300': !editForm.storageLocation }"
-                            :disabled="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''"
+                            disabled
                         />
-                        <div v-if="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''" class="text-xs text-gray-500 mt-1">
-                            <i class="pi pi-info-circle mr-1"></i>
-                            Shipping point cannot be changed once set
-                        </div>
                     </div>
 
                     <!-- Description -->
@@ -153,8 +147,8 @@
                         <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
                             <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
                                 <span class="text-gray-700">
-                                    {{ emailObj.fullName }}
-                                    <span class="text-gray-500 text-xs ml-1">({{ emailObj.email }})</span>
+                                    {{ emailObj.email }}
+                                    <!-- <span class="text-gray-500 text-xs ml-1">({{ emailObj.email }})</span> -->
                                 </span>
                                 <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
                                     <i class="pi pi-times text-xs"></i>
@@ -188,13 +182,13 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-2 pt-6 mt-4">
                     <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="cancelEdit" />
-                    <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting" :disabled="emailObjects.length === 0 || !editForm.storageLocation" :loading="saving" />
+                    <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting" :disabled="emailObjects.length === 0" :loading="saving" />
                 </div>
             </div>
         </Dialog>
 
         <!-- View Emails Dialog -->
-        <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="true">
+        <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="false">
             <div v-if="viewingSetting" class="py-4">
                 <div class="mb-4">
                     <div class="text-lg font-semibold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
@@ -208,10 +202,7 @@
                                 <div class="flex items-center py-2">
                                     <i class="pi pi-user text-gray-400 mr-3"></i>
                                     <div class="flex-1">
-                                        <div class="font-medium text-gray-800">{{ data.fullName }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            {{ data.email }}
-                                        </div>
+                                        <div class="font-medium text-gray-800">{{ data.email }}</div>
                                     </div>
                                 </div>
                             </template>
@@ -476,16 +467,6 @@ export default {
                     severity: 'warn',
                     summary: 'Warning',
                     detail: 'Please add at least one email address',
-                    life: 2000
-                });
-                return;
-            }
-
-            if (!this.editForm.storageLocation) {
-                this.toast.add({
-                    severity: 'warn',
-                    summary: 'Warning',
-                    detail: 'Please select a shipping point',
                     life: 2000
                 });
                 return;
