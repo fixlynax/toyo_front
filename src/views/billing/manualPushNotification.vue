@@ -245,9 +245,6 @@ const validateForm = () => {
     } else if (form.value.message.length > 180) {
         errors.message = 'Message must not exceed 180 characters';
         isValid = false;
-    } else if (form.value.message.length < 5) {
-        errors.message = 'Message should be at least 5 characters';
-        isValid = false;
     }
 
     return isValid;
