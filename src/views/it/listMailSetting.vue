@@ -163,6 +163,7 @@
                         <div class="mb-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Select Email Recipients</label>
                             <MultiSelect
+                                ref="multiSelectRef"
                                 v-model="selectedUsers"
                                 :options="availableUsers"
                                 optionLabel="displayLabel"
@@ -513,10 +514,38 @@ export default {
         // New method for adding from dropdown footer button
         addSelectedEmailsFromDropdown(event) {
             event.stopPropagation(); // Prevent dropdown from closing
+
+            // Add the emails first
             this.addSelectedEmails();
+
+            // Close the dropdown
+            this.closeMultiSelectDropdown();
         },
 
-        // New method for auto-adding when dropdown closes
+        // New method to close the MultiSelect dropdown
+        closeMultiSelectDropdown() {
+            // Method 1: Try to access PrimeVue component methods
+            if (this.$refs.multiSelectRef && this.$refs.multiSelectRef.hide) {
+                this.$refs.multiSelectRef.hide();
+                return;
+            }
+
+            // Method 2: Blur the input field
+            const multiSelectElement = document.querySelector('.email-recipient-dropdown');
+            if (multiSelectElement) {
+                const input = multiSelectElement.querySelector('.p-multiselect-label');
+                if (input) {
+                    input.blur();
+                }
+            }
+
+            // Method 3: Click outside to close (fallback)
+            setTimeout(() => {
+                document.body.click();
+            }, 10);
+        },
+
+        // Updated method for auto-adding when dropdown closes
         autoAddSelectedEmails() {
             // Small delay to ensure dropdown is closed before processing
             setTimeout(() => {
@@ -713,8 +742,12 @@ export default {
             .p-button {
                 margin: 0.5rem;
                 border-radius: 0.375rem;
+                min-width: 120px;
             }
         }
+
+        /* Ensure the panel can be closed properly */
+        z-index: 1100;
     }
 }
 
