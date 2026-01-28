@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-
         <div class="flex justify-between items-center mb-4">
             <div class="text-2xl font-bold text-black">Account Details</div>
         </div>
@@ -108,7 +107,6 @@
             <Column field="sortableDate" header="Document Date Time" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
-                    <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
                 </template>
             </Column>
 
@@ -136,9 +134,10 @@
                 </template>
             </Column>
 
-            <Column header="Action" style="min-width: 10rem; text-align: left">
+            <Column header="Action" style="min-width: 14rem; text-align: left">
                 <template #body="{ data }">
                     <div class="flex gap-2">
+                        <!-- View Button -->
                         <Button
                             icon="pi pi-eye"
                             class="p-button-xm p-button-info"
@@ -147,6 +146,8 @@
                             @click="handleView(data)"
                             v-tooltip.top="data.download ? 'View Account Detail' : 'View not available'"
                         />
+
+                        <!-- Download Button -->
                         <Button
                             icon="pi pi-download"
                             class="p-button-xm"
@@ -156,10 +157,48 @@
                             @click="handleDownload(data)"
                             v-tooltip.top="data.download ? 'Download Account Detail' : 'Download not available'"
                         />
+
+                        <!-- Outstanding Balance Button -->
+                        <Button
+                            icon="pi pi-chart-line"
+                            class="p-button-xm p-button-help"
+                            :disabled="outstandingLoading === data.id"
+                            :loading="outstandingLoading === data.id"
+                            @click="handleOutstandingBalance(data)"
+                            v-tooltip.top="'View Outstanding Balance'"
+                        />
                     </div>
                 </template>
             </Column>
         </DataTable>
+
+        <!-- Outstanding Balance Dialog -->
+        <Dialog v-model:visible="outstandingDialogVisible" :style="{ width: '450px' }" header="Outstanding Balance" :modal="true" :closable="false">
+            <div class="flex flex-col gap-4">
+                <div class="text-center">
+                    <div class="text-lg font-semibold text-gray-700 mb-2">Outstanding Balance</div>
+                    <div class="text-3xl font-bold text-blue-600 mb-2">RM {{ formatCurrency(outstandingBalance) }}</div>
+                    <div class="text-sm text-gray-500">as of {{ outstandingBalanceTime }}</div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+                    <div v-if="selectedCustomerName" class="text-sm text-gray-600 mb-2 font-bold">{{ selectedCustomerName }}</div>
+                    <div class="text-sm text-gray-600 font-bold">{{ selectedCustomerAccount }}</div>
+                </div>
+
+                <div v-if="outstandingError" class="p-3 bg-red-50 border border-red-200 rounded">
+                    <div class="flex items-center text-red-700">
+                        <i class="pi pi-exclamation-circle mr-2"></i>
+                        <span class="text-sm">{{ outstandingError }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <Button label="Close" icon="pi pi-times" class="p-button-outlined p-button-sl" @click="outstandingDialogVisible = false" />
+                <!-- <Button label="Refresh" icon="pi pi-refresh" class="p-button-primary" @click="refreshOutstandingBalance" :disabled="outstandingLoading === 'refresh'" :loading="outstandingLoading === 'refresh'" /> -->
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -173,6 +212,7 @@ import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
+import Dialog from 'primevue/dialog';
 
 const toast = useToast();
 
@@ -188,11 +228,20 @@ const loading = ref(false);
 const filterLoading = ref(false);
 const downloadLoading = ref(null);
 const viewLoading = ref(null);
+const outstandingLoading = ref(null);
 const error = ref(null);
 const dateRange = ref([null, null]);
 const customerAccountFilter = ref('');
 const hasDateFilterApplied = ref(false);
 const sortField = ref('sortableDate');
+
+// Outstanding Balance Dialog State
+const outstandingDialogVisible = ref(false);
+const outstandingBalance = ref(null);
+const outstandingBalanceTime = ref('');
+const outstandingError = ref(null);
+const selectedCustomerAccount = ref('');
+const selectedCustomerName = ref('');
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
@@ -294,6 +343,33 @@ const AccountDetailService = {
         }
     },
 
+    async getOutstandingBalance(custAccountNo) {
+        try {
+            const response = await api.post('credit/getOutstandingBalance', {
+                custAccountNo: custAccountNo
+            });
+
+            if (response.data.status === 1) {
+                return {
+                    success: true,
+                    outstanding_balance: response.data.admin_data.outstanding_balance,
+                    server_time: response.data.admin_data.server_time
+                };
+            } else {
+                return {
+                    success: false,
+                    error: response.data.error || 'Failed to fetch outstanding balance'
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching outstanding balance:', error);
+            return {
+                success: false,
+                error: error.response?.data?.error || error.message || 'Network error'
+            };
+        }
+    },
+
     async downloadFile(filePath, fileName) {
         try {
             const response = await api.postExtra(
@@ -386,6 +462,84 @@ const AccountDetailService = {
 
             throw error;
         }
+    }
+};
+
+// 🟢 Handle Outstanding Balance
+const handleOutstandingBalance = async (data) => {
+    if (!data.dealerId) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Invalid Data',
+            detail: 'Customer account number is missing',
+            life: 3000
+        });
+        return;
+    }
+
+    outstandingLoading.value = data.id;
+    selectedCustomerAccount.value = data.dealerId;
+    selectedCustomerName.value = data.dealerName || '';
+    outstandingBalance.value = null;
+    outstandingBalanceTime.value = '';
+    outstandingError.value = null;
+
+    try {
+        const result = await AccountDetailService.getOutstandingBalance(data.dealerId);
+
+        if (result.success) {
+            outstandingBalance.value = result.outstanding_balance;
+            outstandingBalanceTime.value = result.server_time;
+            outstandingDialogVisible.value = true;
+        } else {
+            outstandingError.value = result.error;
+            outstandingDialogVisible.value = true;
+        }
+    } catch (error) {
+        console.error('Failed to get outstanding balance:', error);
+        outstandingError.value = 'Failed to retrieve outstanding balance. Please try again.';
+        outstandingDialogVisible.value = true;
+    } finally {
+        outstandingLoading.value = null;
+    }
+};
+
+// 🟢 Refresh Outstanding Balance
+const refreshOutstandingBalance = async () => {
+    if (!selectedCustomerAccount.value) {
+        toast.add({
+            severity: 'warn',
+            summary: 'No Account Selected',
+            detail: 'Please select a customer first',
+            life: 3000
+        });
+        return;
+    }
+
+    outstandingLoading.value = 'refresh';
+    outstandingError.value = null;
+
+    try {
+        const result = await AccountDetailService.getOutstandingBalance(selectedCustomerAccount.value);
+
+        if (result.success) {
+            outstandingBalance.value = result.outstanding_balance;
+            outstandingBalanceTime.value = result.server_time;
+
+            toast.add({
+                severity: 'success',
+                summary: 'Balance Updated',
+                detail: 'Outstanding balance has been refreshed',
+                life: 3000
+            });
+        } else {
+            outstandingError.value = result.error;
+        }
+    } catch (error) {
+        console.error('Failed to refresh outstanding balance:', error);
+        outstandingError.value = 'Failed to refresh outstanding balance. Please try again.';
+    } finally {
+        outstandingLoading.value = null;
     }
 };
 
@@ -483,21 +637,6 @@ const loadFilteredData = async () => {
             if (!a.sortableDate || !b.sortableDate) return 0;
             return b.sortableDate.localeCompare(a.sortableDate);
         });
-
-        // let filterMessage = `Showing account details`;
-        // if (dateRange.value[0] && dateRange.value[1]) {
-        //     filterMessage += ` from ${formatDateForDisplay(dateRange.value[0])} to ${formatDateForDisplay(dateRange.value[1])}`;
-        // }
-        // if (accountFilterValue) {
-        //     filterMessage += ` for account: ${accountFilterValue}`;
-        // }
-
-        // toast.add({
-        //     severity: 'success',
-        //     summary: 'Filter Applied',
-        //     detail: filterMessage,
-        //     life: 3000
-        // });
     } catch (err) {
         console.error('Failed to load filtered data:', err);
         error.value = err.message;
@@ -884,6 +1023,22 @@ const formatDateForDisplay = (dateString) => {
     .p-inputtext {
         padding: 0.6rem;
         text-align: left;
+    }
+}
+
+/* Custom styling for Outstanding Balance dialog */
+:deep(.p-dialog) {
+    .p-dialog-header {
+        padding: 1.5rem;
+    }
+
+    .p-dialog-content {
+        padding: 1.5rem;
+    }
+
+    .p-dialog-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e5e7eb;
     }
 }
 </style>

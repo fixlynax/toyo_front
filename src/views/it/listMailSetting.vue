@@ -44,8 +44,19 @@
                 <template #body="{ data }">
                     <div class="flex flex-col">
                         <span class="font-bold text-gray-800">{{ data.function }}</span>
-                        <span v-if="data.description" class="font-semibold text-ms text-gray-500 mt-1 line-clamp-2">{{ data.description }}</span>
-                        <span v-else class="text-xm text-gray-400 italic mt-1">No description</span>
+                    </div>
+                </template>
+            </Column>
+
+            <!-- Updated Description Column -->
+            <Column header="Description" style="min-width: 12rem">
+                <template #body="{ data }">
+                    <div class="description-column-wrapper">
+                        <div v-if="data.description" class="description-content">
+                            <div class="description-text" v-html="data.description"></div>
+                            <Button icon="pi pi-eye" class="p-button-text p-button-xm description-icon-btn" @click="viewFullDescription(data)" :title="'View full description'" />
+                        </div>
+                        <span v-else class="no-description">No description</span>
                     </div>
                 </template>
             </Column>
@@ -59,8 +70,7 @@
             <Column field="shippingPoint" header="Shipping Point" style="min-width: 10rem" sortable>
                 <template #body="{ data }">
                     <div class="flex items-center">
-                        <i class="pi pi-map-marker text-primary mr-2"></i>
-                        <span class="text-black font-semibold">{{ data.shippingPoint || 'Not specified' }}</span>
+                        <span class="text-black font-semibold">{{ data.shippingPoint || '-' }}</span>
                     </div>
                 </template>
             </Column>
@@ -68,9 +78,9 @@
             <Column header="Email Recipients" style="min-width: 12rem">
                 <template #body="{ data }">
                     <div class="flex items-center">
-                        <i class="pi pi-users text-primary mr-2"></i>
-                        <span class="text-gray-700">{{ data.emails.length }} recipient(s)</span>
-                        <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-sm ml-2" @click="viewEmails(data)" title="View emails" />
+                        <Badge class="w-8">{{ data.emails.length }}</Badge>
+                        <span class="text-black ml-2">recipient(s)</span>
+                        <Button v-if="data.emails.length > 0" icon="pi pi-eye" class="p-button-text p-button-xm" @click="viewEmails(data)" title="View emails" />
                     </div>
                 </template>
             </Column>
@@ -118,26 +128,13 @@
                     <!-- Storage Location -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1"> Shipping Point (Storage Location)</label>
-                        <Dropdown
-                            v-model="editForm.storageLocation"
-                            :options="storageLocationOptions"
-                            optionLabel="label"
-                            optionValue="value"
-                            placeholder="Select shipping point"
-                            class="w-full"
-                            :class="{ 'border-red-300': !editForm.storageLocation }"
-                            :disabled="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''"
-                        />
-                        <div v-if="editingSetting.shippingPoint !== '-' && editingSetting.shippingPoint !== null && editingSetting.shippingPoint !== ''" class="text-xs text-gray-500 mt-1">
-                            <i class="pi pi-info-circle mr-1"></i>
-                            Shipping point cannot be changed once set
-                        </div>
+                        <Dropdown v-model="editForm.storageLocation" :options="storageLocationOptions" optionLabel="label" optionValue="value" placeholder="Select shipping point" class="w-full" disabled />
                     </div>
 
-                    <!-- Description -->
+                    <!-- Description with Text Editor -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1"> Description </label>
-                        <Textarea v-model="editForm.description" :rows="3" class="w-full" placeholder="Enter description..." />
+                        <TipTapEditorDesc v-model="editForm.description" :placeholderDesc="'Enter description...'" :showIconsDesc="true" :showCharacterCountDesc="false" />
                     </div>
 
                     <!-- Email Recipients -->
@@ -153,8 +150,7 @@
                         <div class="flex flex-wrap gap-2 mb-3 p-3 bg-gray-50 border border-gray-200 rounded-md min-h-[3.5rem]">
                             <div v-for="(emailObj, index) in emailObjects" :key="index" class="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1 text-sm">
                                 <span class="text-gray-700">
-                                    {{ emailObj.fullName }}
-                                    <span class="text-gray-500 text-xs ml-1">({{ emailObj.email }})</span>
+                                    {{ emailObj.email }}
                                 </span>
                                 <button type="button" @click="removeEmail(index)" class="ml-1 text-gray-400 hover:text-red-500 focus:outline-none" title="Remove email">
                                     <i class="pi pi-times text-xs"></i>
@@ -166,7 +162,16 @@
                         <!-- Multi-Select Dropdown for Users -->
                         <div class="mb-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Select Email Recipients</label>
-                            <MultiSelect v-model="selectedUsers" :options="availableUsers" optionLabel="displayLabel" optionValue="email" placeholder="Search and select users..." :filter="true" class="w-full">
+                            <MultiSelect
+                                v-model="selectedUsers"
+                                :options="availableUsers"
+                                optionLabel="displayLabel"
+                                optionValue="email"
+                                placeholder="Search and select users..."
+                                :filter="true"
+                                class="w-full email-recipient-dropdown"
+                                @before-hide="autoAddSelectedEmails"
+                            >
                                 <template #option="slotProps">
                                     <div class="flex items-center">
                                         <i class="pi pi-user text-gray-400 mr-2"></i>
@@ -176,10 +181,19 @@
                                         </div>
                                     </div>
                                 </template>
+
+                                <!-- Add button inside dropdown footer -->
+                                <template #footer>
+                                    <div class="p-2 border-t border-gray-200">
+                                        <div class="flex justify-end">
+                                            <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm" @click="addSelectedEmailsFromDropdown" :disabled="selectedUsers.length === 0" size="small" />
+                                        </div>
+                                    </div>
+                                </template>
                             </MultiSelect>
                             <div class="flex justify-between mt-2">
                                 <span class="text-xs text-gray-500">{{ selectedUsers.length }} user(s) selected</span>
-                                <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm p-button-outlined" @click="addSelectedEmails" :disabled="selectedUsers.length === 0" />
+                                <!-- <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm p-button-outlined" @click="addSelectedEmails" :disabled="selectedUsers.length === 0" /> -->
                             </div>
                         </div>
                     </div>
@@ -188,16 +202,16 @@
                 <!-- Action Buttons -->
                 <div class="flex justify-end gap-2 pt-6 mt-4">
                     <Button label="Cancel" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="cancelEdit" />
-                    <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting" :disabled="emailObjects.length === 0 || !editForm.storageLocation" :loading="saving" />
+                    <Button label="Save Changes" icon="pi pi-check" class="p-button p-button-sm" @click="saveSetting" :disabled="emailObjects.length === 0" :loading="saving" />
                 </div>
             </div>
         </Dialog>
 
         <!-- View Emails Dialog -->
-        <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="true">
+        <Dialog v-model:visible="viewEmailsDialogVisible" :style="{ width: '600px' }" header="Email Recipients" :modal="true" :closable="false">
             <div v-if="viewingSetting" class="py-4">
                 <div class="mb-4">
-                    <div class="text-lg font-semibold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
+                    <div class="text-lg font-bold text-gray-800 mb-1">{{ viewingSetting.function }}</div>
                     <div class="text-sm text-gray-500">{{ viewingSetting.emails.length }} recipient(s)</div>
                 </div>
 
@@ -208,10 +222,7 @@
                                 <div class="flex items-center py-2">
                                     <i class="pi pi-user text-gray-400 mr-3"></i>
                                     <div class="flex-1">
-                                        <div class="font-medium text-gray-800">{{ data.fullName }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            {{ data.email }}
-                                        </div>
+                                        <div class="font-medium text-gray-800">{{ data.email }}</div>
                                     </div>
                                 </div>
                             </template>
@@ -231,6 +242,21 @@
                 </div>
             </div>
         </Dialog>
+
+        <!-- Full Description Dialog -->
+        <Dialog v-model:visible="descriptionDialogVisible" :style="{ width: '700px' }" header="Description" :modal="true" :closable="false" :draggable="false">
+            <div v-if="viewingDescription" class="py-4">
+                <div class="mb-4">
+                    <div class="text-lg font-bold text-gray-800 mb-1">{{ viewingDescription.function }}</div>
+                </div>
+
+                <div class="description-full-view border border-gray-200 rounded-md p-4 bg-gray-50" v-html="viewingDescription.description"></div>
+
+                <div class="flex justify-end pt-4 mt-4">
+                    <Button label="Close" icon="pi pi-times" class="p-button-outlined p-button-sm" @click="descriptionDialogVisible = false" />
+                </div>
+            </div>
+        </Dialog>
     </div>
 </template>
 
@@ -242,6 +268,7 @@ import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
 import Textarea from 'primevue/textarea';
 import MultiSelect from 'primevue/multiselect';
+import TipTapEditorDesc from '@/components/TipTapEditorDesc.vue';
 import { computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 
@@ -252,7 +279,8 @@ export default {
         Dialog,
         Dropdown,
         Textarea,
-        MultiSelect
+        MultiSelect,
+        TipTapEditorDesc
     },
     setup() {
         const toast = useToast();
@@ -264,8 +292,10 @@ export default {
             loading: true,
             editDialogVisible: false,
             viewEmailsDialogVisible: false,
+            descriptionDialogVisible: false,
             editingSetting: null,
             viewingSetting: null,
+            viewingDescription: null,
             filters1: { global: { value: null, matchMode: 'contains' } },
             // Email editing state
             emailObjects: [],
@@ -404,6 +434,11 @@ export default {
             this.viewEmailsDialogVisible = true;
         },
 
+        viewFullDescription(setting) {
+            this.viewingDescription = setting;
+            this.descriptionDialogVisible = true;
+        },
+
         async editSetting(setting) {
             if (!this.canUpdate) {
                 this.toast.add({
@@ -463,11 +498,44 @@ export default {
 
             // Clear selection
             this.selectedUsers = [];
+
+            // Show feedback
+            if (newEmails.length > 0) {
+                this.toast.add({
+                    severity: 'success',
+                    summary: 'Added',
+                    detail: `Added ${newEmails.length} email(s)`,
+                    life: 2000
+                });
+            }
+        },
+
+        // New method for adding from dropdown footer button
+        addSelectedEmailsFromDropdown(event) {
+            event.stopPropagation(); // Prevent dropdown from closing
+            this.addSelectedEmails();
+        },
+
+        // New method for auto-adding when dropdown closes
+        autoAddSelectedEmails() {
+            // Small delay to ensure dropdown is closed before processing
+            setTimeout(() => {
+                if (this.selectedUsers.length > 0) {
+                    this.addSelectedEmails();
+                }
+            }, 50);
         },
 
         removeEmail(index) {
-            // Remove the email from emailObjects
+            const removedEmail = this.emailObjects[index];
             this.emailObjects.splice(index, 1);
+
+            this.toast.add({
+                severity: 'info',
+                summary: 'Removed',
+                detail: `Removed ${removedEmail.email}`,
+                life: 2000
+            });
         },
 
         async saveSetting() {
@@ -476,16 +544,6 @@ export default {
                     severity: 'warn',
                     summary: 'Warning',
                     detail: 'Please add at least one email address',
-                    life: 2000
-                });
-                return;
-            }
-
-            if (!this.editForm.storageLocation) {
-                this.toast.add({
-                    severity: 'warn',
-                    summary: 'Warning',
-                    detail: 'Please select a shipping point',
                     life: 2000
                 });
                 return;
@@ -646,6 +704,20 @@ export default {
     }
 }
 
+/* Email recipient dropdown specific styling */
+:deep(.email-recipient-dropdown) {
+    .p-multiselect-panel {
+        .p-multiselect-footer {
+            padding: 0;
+
+            .p-button {
+                margin: 0.5rem;
+                border-radius: 0.375rem;
+            }
+        }
+    }
+}
+
 .card {
     background: white;
     border-radius: 0.75rem;
@@ -653,7 +725,76 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Custom email tag styling */
+/* Updated Description Column Styling */
+.description-column-wrapper {
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.description-content {
+    display: flex;
+    align-items: flex-start;
+    width: 90%;
+}
+
+.description-text {
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    max-height: 3.5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-height: 1.4em;
+}
+
+/* List styling for description preview */
+.description-text :deep(p) {
+    margin: 0 0 0.5em 0;
+}
+
+.description-text :deep(ul) {
+    list-style-type: disc !important;
+    padding-left: 1.5em !important;
+    margin: 0.5em 0 !important;
+}
+
+.description-text :deep(ol) {
+    list-style-type: decimal !important;
+    padding-left: 1.5em !important;
+    margin: 0.5em 0 !important;
+}
+
+.description-text :deep(li) {
+    margin: 0.25em 0 !important;
+}
+
+.description-text :deep(li > p) {
+    margin: 0 !important;
+}
+
+.description-icon-btn {
+    width: 25px;
+    height: 65px;
+    padding: 0;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.description-icon-btn:hover {
+    background-color: #f3f4f6 !important;
+}
+
+.no-description {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Email tag styling */
 .email-tag {
     transition: all 0.2s ease;
 }
@@ -667,11 +808,45 @@ export default {
     color: #ef4444 !important;
 }
 
-/* Line clamp for description text */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+/* Description dialog styling */
+.description-full-view {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* List styling for full description view */
+.description-full-view :deep(p) {
+    margin-bottom: 0.75rem;
+}
+
+.description-full-view :deep(ul) {
+    list-style-type: disc !important;
+    padding-left: 1.5em !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.description-full-view :deep(ol) {
+    list-style-type: decimal !important;
+    padding-left: 1.5em !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.description-full-view :deep(li) {
+    margin-bottom: 0.25rem !important;
+}
+
+.description-full-view :deep(li > p) {
+    margin: 0 !important;
+}
+
+/* Ensure editor is properly visible in dialog */
+:deep(.tiptap-editor-desc) {
+    background: white;
+}
+
+:deep(.tiptap-editor-desc .editor-content-desc) {
+    background: white;
 }
 </style>

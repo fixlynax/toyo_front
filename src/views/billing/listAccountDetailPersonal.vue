@@ -1,6 +1,5 @@
 <template>
     <div class="card">
-
         <div class="flex justify-start items-center mb-4">
             <Button @click="$router.back()" icon="pi pi-arrow-left font-bold" class="p-button-text p-button-secondary text-xl" size="big" v-tooltip="'Back'" />
             <div class="text-2xl font-bold text-black">Account Details - Customer: {{ custAccNo }}</div>
@@ -30,11 +29,12 @@
             :filters="filters1"
             :rowsPerPageOptions="[10, 20, 50, 100]"
             removableSort
-            sortField="sortableDate"
-            :sortOrder="-1"
+            :sortField="sortField"
+            :sortOrder="sortOrder"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
             v-model:selection="selectedFiles"
+            @sort="onSort"
         >
             <template #header>
                 <div class="flex flex-col gap-4 w-full">
@@ -100,7 +100,8 @@
 
             <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
 
-            <Column field="docsDate" header="Document Date Time" style="min-width: 12rem" sortable>
+            <!-- Document Date Time Column - sort by sortableTimestamp but display docsDate -->
+            <Column field="sortableTimestamp" header="Document Date Time" style="min-width: 12rem" sortable>
                 <template #body="{ data }">
                     <span class="font-medium">{{ data.docsDate }}</span>
                     <!-- <div class="text-xs text-gray-500">{{ formatDateForDisplay(data.docsDate) }}</div> -->
@@ -186,12 +187,98 @@ const error = ref(null);
 const dateRange = ref([null, null]);
 const hasDateFilterApplied = ref(false);
 const custAccNo = ref(route.params.custAccNo || '');
+const sortField = ref('sortableTimestamp');
+const sortOrder = ref(-1);
 
 // Debounce timer for date changes
 let debounceTimer = null;
 
 // Selection state for bulk download
 const selectedFiles = ref([]);
+
+// 🟢 Sort handler
+const onSort = (event) => {
+    sortField.value = event.sortField;
+    sortOrder.value = event.sortOrder;
+};
+
+// 🟢 Helper function to parse date time string with time including AM/PM
+const parseDateTimeWithTime = (dateTimeStr) => {
+    if (!dateTimeStr) return { parsedDate: null, sortableTimestamp: null };
+
+    try {
+        // Try to parse DD/MM/YYYY HH:MM:SS format (with or without AM/PM)
+        if (dateTimeStr.includes('/')) {
+            // Split date and time parts
+            const parts = dateTimeStr.split(' ');
+            const datePart = parts[0];
+            let timePart = parts[1] || '';
+            let ampm = parts[2] || '';
+
+            if (datePart) {
+                const [day, month, year] = datePart.split('/');
+                let hours = 0,
+                    minutes = 0,
+                    seconds = 0;
+
+                // Parse time if available
+                if (timePart) {
+                    const timeParts = timePart.split(':');
+                    hours = parseInt(timeParts[0]) || 0;
+                    minutes = parseInt(timeParts[1]) || 0;
+                    seconds = parseInt(timeParts[2]) || 0;
+
+                    // Adjust for AM/PM if present
+                    if (ampm) {
+                        ampm = ampm.toUpperCase();
+                        if (ampm === 'PM' && hours < 12) {
+                            hours += 12;
+                        } else if (ampm === 'AM' && hours === 12) {
+                            hours = 0;
+                        }
+                    }
+                }
+
+                // Create a Date object with all components
+                const parsedDate = new Date(
+                    parseInt(year),
+                    parseInt(month) - 1, // Months are 0-indexed
+                    parseInt(day),
+                    hours,
+                    minutes,
+                    seconds
+                );
+
+                // Return both the Date object and timestamp for sorting
+                return {
+                    parsedDate: parsedDate,
+                    sortableTimestamp: parsedDate.getTime()
+                };
+            }
+        }
+
+        // Fallback to just date parsing
+        const datePart = dateTimeStr.split(' ')[0];
+        if (datePart && datePart.includes('/')) {
+            const [day, month, year] = datePart.split('/');
+            const parsedDate = new Date(`${year}-${month}-${day}`);
+            return {
+                parsedDate: parsedDate,
+                sortableTimestamp: parsedDate.getTime()
+            };
+        }
+
+        // Try ISO format
+        const parsedDate = new Date(dateTimeStr);
+        return {
+            parsedDate: parsedDate,
+            sortableTimestamp: parsedDate.getTime()
+        };
+    } catch (error) {
+        console.error('Error parsing date time:', dateTimeStr, error);
+        return { parsedDate: null, sortableTimestamp: null };
+    }
+};
 
 // 🟢 API service functions for Account Detail
 const AccountDetailService = {
@@ -218,33 +305,14 @@ const AccountDetailService = {
             if (response.data.status === 1) {
                 // Transform the API data to match your table structure
                 return response.data.admin_data.map((item) => {
-                    // Extract and parse the date from datetime
+                    // Parse the date time string with time information
                     const dateTimeStr = item.datetime;
-                    let parsedDate = null;
-                    let sortableDate = null;
-
-                    // Parse the date from various formats
-                    if (dateTimeStr) {
-                        // Try to parse DD/MM/YYYY HH:MM:SS format
-                        if (dateTimeStr.includes('/')) {
-                            const datePart = dateTimeStr.split(' ')[0]; // Get date part
-                            const [day, month, year] = datePart.split('/');
-                            if (day && month && year) {
-                                parsedDate = new Date(`${year}-${month}-${day}`);
-                                sortableDate = parsedDate.getTime();
-                            }
-                        }
-                        // Try ISO format
-                        else {
-                            parsedDate = new Date(dateTimeStr);
-                            sortableDate = parsedDate.getTime();
-                        }
-                    }
+                    const { parsedDate, sortableTimestamp } = parseDateTimeWithTime(dateTimeStr);
 
                     return {
                         id: item.file_path,
                         docsDate: item.datetime,
-                        sortableDate: sortableDate, // For proper sorting
+                        sortableTimestamp: sortableTimestamp, // For proper sorting including time
                         dealerId: item.account_no,
                         dealerName: item.custName,
                         amtdue: parseFloat(item.amount),
@@ -393,6 +461,10 @@ const loadFilteredData = async () => {
     try {
         listData.value = await AccountDetailService.getAccountDetailList(dateRange.value[0], dateRange.value[1]);
         hasDateFilterApplied.value = true;
+
+        // Reset sort to default
+        sortField.value = 'sortableTimestamp';
+        sortOrder.value = -1;
 
         // toast.add({
         //     severity: 'success',
@@ -606,7 +678,7 @@ onBeforeMount(async () => {
     loading.value = false; // Set loading to false since we won't load data initially
     listData.value = []; // Initialize with empty array
     hasDateFilterApplied.value = false; // No filter applied initially
-    
+
     // Initialize custAccNo from route parameters
     custAccNo.value = route.params.custAccNo || '';
 });
@@ -627,6 +699,10 @@ const refreshData = async () => {
     error.value = null;
     try {
         listData.value = await AccountDetailService.getAccountDetailList(dateRange.value[0], dateRange.value[1]);
+
+        // Reset sort to default
+        sortField.value = 'sortableTimestamp';
+        sortOrder.value = -1;
 
         toast.add({
             severity: 'success',
@@ -701,6 +777,8 @@ const clearDateRange = () => {
     hasDateFilterApplied.value = false;
     listData.value = [];
     selectedFiles.value = [];
+    sortField.value = 'sortableTimestamp';
+    sortOrder.value = -1;
 
     toast.add({
         severity: 'info',

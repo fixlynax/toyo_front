@@ -484,6 +484,11 @@ const model = ref([
                 to: '/billing/BCP'
             },
             {
+                label: 'Manual Push Notification',
+                icon: 'pi pi-fw pi-bell',
+                to: '/billing/manualPushNotification'
+            },
+            {
                 label: 'Messaging',
                 icon: 'pi pi-fw pi-send',
                 to: '/billing/listMessaging'

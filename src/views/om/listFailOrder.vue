@@ -191,7 +191,7 @@ const formatDate = (dateString) => {
 
 const formatDateTime = (dateString) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     const options = {
         day: '2-digit',
@@ -202,9 +202,9 @@ const formatDateTime = (dateString) => {
         second: '2-digit',
         hour12: true
     };
-    
+
     let formatted = date.toLocaleString('en-MY', options);
-    
+
     // Convert AM/PM to uppercase regardless of case
     return formatted.replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase());
 };
@@ -300,7 +300,7 @@ onBeforeMount(async () => {
                         <!-- Top Row: Search and Date Filter -->
                         <div class="flex items-center justify-between gap-4 w-full flex-wrap">
                             <div class="flex items-center gap-2">
-                                <IconField class="w-64">
+                                <IconField class="w-[350px]">
                                     <InputIcon><i class="pi pi-search" /></InputIcon>
                                     <InputText v-model="filters1['global'].value" placeholder="Search failed orders..." class="w-full" />
                                 </IconField>
@@ -310,7 +310,10 @@ onBeforeMount(async () => {
                                 <!-- Date Range Dropdown -->
                                 <div class="flex items-center gap-2">
                                     <span class="text-sm font-medium text-gray-700">Date Range:</span>
-                                    <Dropdown v-model="selectedDateRange" :options="dateRangeOptions" optionLabel="label" optionValue="value" placeholder="Select period" class="w-40" :disabled="loading" />
+                                    <div class="w-[200px]">
+                                        <Dropdown v-model="selectedDateRange" :options="dateRangeOptions" optionLabel="label" optionValue="value" placeholder="Select period" class="w-full" :disabled="loading" />
+                                    </div>
+
                                     <Button v-if="selectedDateRange" icon="pi pi-times" class="p-button-text p-button-sm" @click="clearDateRange" title="Clear date filter" />
                                 </div>
                             </div>
