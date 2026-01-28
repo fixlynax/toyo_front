@@ -185,7 +185,9 @@
                                 <!-- Add button inside dropdown footer -->
                                 <template #footer>
                                     <div class="p-2 border-t border-gray-200">
-                                        <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm w-full justify-center" @click="addSelectedEmailsFromDropdown" :disabled="selectedUsers.length === 0" size="small" />
+                                        <div class="flex justify-end">
+                                            <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm" @click="addSelectedEmailsFromDropdown" :disabled="selectedUsers.length === 0" size="small" />
+                                        </div>
                                     </div>
                                 </template>
                             </MultiSelect>
