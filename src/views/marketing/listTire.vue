@@ -20,7 +20,7 @@
                 :loading="tableLoading"
                 :filters="filters"
                 filterDisplay="menu"
-                :globalFilterFields="['custAccountNo', 'shopName', 'regionName', 'areaName', 'address', 'channel', 'signboardType', 'created', 'updated']"
+                :globalFilterFields="['custAccountNo', 'shopName', 'regionName', 'areaName', 'address', 'channel', 'signboardType']"
                 class="rounded-table"
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                 paginatorTemplate="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -74,8 +74,8 @@
                     </template>
                 </Column>
 
-                <Column field="regionName" header="Region Area" style="min-width: 8rem" sortable>
-                    <template #body="{ data }"> {{ data.regionName }},{{ data.areaName }} </template>
+                <Column field="regionName" header="Region" style="min-width: 8rem" sortable>
+                    <template #body="{ data }"> {{ data.regionName }}</template>
                 </Column>
 
                 <Column field="address" header="Address" style="min-width: 10rem" sortable>
@@ -96,7 +96,7 @@
                     </template>
                 </Column>
 
-                <Column field="created" header="Created" style="min-width: 10rem" sortable>
+                <!-- <Column field="created" header="Created" style="min-width: 10rem" sortable>
                     <template #body="{ data }">
                         {{ formatDateTime(data.created) }}
                     </template>
@@ -106,7 +106,7 @@
                     <template #body="{ data }">
                         {{ formatDateTime(data.updated) }}
                     </template>
-                </Column>
+                </Column> -->
             </DataTable>
         </div>
     </div>

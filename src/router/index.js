@@ -1020,6 +1020,14 @@ const router = createRouter({
                     meta: { permission: 'BCP', access: 'view' }
                 },
 
+                // Manual Push Notification
+                {
+                    path: 'billing/manualPushNotification',
+                    name: 'Manual-Push-Notification',
+                    component: () => import('@/views/billing/manualPushNotification.vue'),
+                    meta: { permission: 'Manual Push Notification', access: 'view' }
+                },
+
                 // ===============================
                 // SCM (Supply Chain Management)
                 // ===============================
