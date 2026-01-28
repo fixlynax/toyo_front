@@ -736,6 +736,7 @@ export default {
 /* Email recipient dropdown specific styling */
 :deep(.email-recipient-dropdown) {
     .p-multiselect-panel {
+        z-index: 1100;
         .p-multiselect-footer {
             padding: 0;
 
@@ -745,9 +746,6 @@ export default {
                 min-width: 120px;
             }
         }
-
-        /* Ensure the panel can be closed properly */
-        z-index: 1100;
     }
 }
 
