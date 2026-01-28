@@ -162,7 +162,16 @@
                         <!-- Multi-Select Dropdown for Users -->
                         <div class="mb-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Select Email Recipients</label>
-                            <MultiSelect v-model="selectedUsers" :options="availableUsers" optionLabel="displayLabel" optionValue="email" placeholder="Search and select users..." :filter="true" class="w-full">
+                            <MultiSelect
+                                v-model="selectedUsers"
+                                :options="availableUsers"
+                                optionLabel="displayLabel"
+                                optionValue="email"
+                                placeholder="Search and select users..."
+                                :filter="true"
+                                class="w-full email-recipient-dropdown"
+                                @before-hide="autoAddSelectedEmails"
+                            >
                                 <template #option="slotProps">
                                     <div class="flex items-center">
                                         <i class="pi pi-user text-gray-400 mr-2"></i>
@@ -172,10 +181,17 @@
                                         </div>
                                     </div>
                                 </template>
+
+                                <!-- Add button inside dropdown footer -->
+                                <template #footer>
+                                    <div class="p-2 border-t border-gray-200">
+                                        <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm w-full justify-center" @click="addSelectedEmailsFromDropdown" :disabled="selectedUsers.length === 0" size="small" />
+                                    </div>
+                                </template>
                             </MultiSelect>
                             <div class="flex justify-between mt-2">
                                 <span class="text-xs text-gray-500">{{ selectedUsers.length }} user(s) selected</span>
-                                <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm p-button-outlined" @click="addSelectedEmails" :disabled="selectedUsers.length === 0" />
+                                <!-- <Button label="Add Selected" icon="pi pi-plus" class="p-button-sm p-button-outlined" @click="addSelectedEmails" :disabled="selectedUsers.length === 0" /> -->
                             </div>
                         </div>
                     </div>
@@ -230,7 +246,6 @@
             <div v-if="viewingDescription" class="py-4">
                 <div class="mb-4">
                     <div class="text-lg font-bold text-gray-800 mb-1">{{ viewingDescription.function }}</div>
-                    <!-- <div class="text-sm text-gray-500">{{ viewingDescription.shippingPoint || 'No shipping point' }}</div> -->
                 </div>
 
                 <div class="description-full-view border border-gray-200 rounded-md p-4 bg-gray-50" v-html="viewingDescription.description"></div>
@@ -481,11 +496,44 @@ export default {
 
             // Clear selection
             this.selectedUsers = [];
+
+            // Show feedback
+            if (newEmails.length > 0) {
+                this.toast.add({
+                    severity: 'success',
+                    summary: 'Added',
+                    detail: `Added ${newEmails.length} email(s)`,
+                    life: 2000
+                });
+            }
+        },
+
+        // New method for adding from dropdown footer button
+        addSelectedEmailsFromDropdown(event) {
+            event.stopPropagation(); // Prevent dropdown from closing
+            this.addSelectedEmails();
+        },
+
+        // New method for auto-adding when dropdown closes
+        autoAddSelectedEmails() {
+            // Small delay to ensure dropdown is closed before processing
+            setTimeout(() => {
+                if (this.selectedUsers.length > 0) {
+                    this.addSelectedEmails();
+                }
+            }, 50);
         },
 
         removeEmail(index) {
-            // Remove the email from emailObjects
+            const removedEmail = this.emailObjects[index];
             this.emailObjects.splice(index, 1);
+
+            this.toast.add({
+                severity: 'info',
+                summary: 'Removed',
+                detail: `Removed ${removedEmail.email}`,
+                life: 2000
+            });
         },
 
         async saveSetting() {
@@ -651,6 +699,20 @@ export default {
 :deep(.p-multiselect) {
     .p-multiselect-label {
         padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Email recipient dropdown specific styling */
+:deep(.email-recipient-dropdown) {
+    .p-multiselect-panel {
+        .p-multiselect-footer {
+            padding: 0;
+
+            .p-button {
+                margin: 0.5rem;
+                border-radius: 0.375rem;
+            }
+        }
     }
 }
 
